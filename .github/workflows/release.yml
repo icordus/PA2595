@@ -6,14 +6,13 @@ on:
       - "v*"
   workflow_dispatch:
     inputs:
-      publish_to_github_packages:
-        description: "Attempt publish to GitHub Packages"
+      publish_to_testpypi:
+        description: "Publish package to TestPyPI"
         required: false
-        default: "false"
+        default: "true"
 
 permissions:
   contents: write
-  packages: write
 
 jobs:
   release:
@@ -54,31 +53,17 @@ jobs:
           files: |
             dist/*
 
-      - name: Validate package publish credentials
-        if: ${{ github.event_name == 'push' || inputs.publish_to_github_packages == 'true' }}
+      - name: Publish to TestPyPI
+        if: ${{ github.event_name == 'push' || inputs.publish_to_testpypi == 'true' }}
         env:
-          TWINE_PASSWORD: ${{ secrets.GH_PACKAGES_TOKEN || github.token }}
+          TWINE_USERNAME: __token__
+          TWINE_PASSWORD: ${{ secrets.TESTPYPI_TOKEN }}
         run: |
           if [ -z "$TWINE_PASSWORD" ]; then
-            echo "::error::No token available for GitHub Packages publish. Set GH_PACKAGES_TOKEN or use GITHUB_TOKEN."
+            echo "::error::Missing TESTPYPI_TOKEN secret. Add TESTPYPI_TOKEN in repository Actions secrets."
             exit 1
           fi
-
-      - name: Publish to GitHub Packages
-        id: publish_gpr
-        if: ${{ github.event_name == 'push' || inputs.publish_to_github_packages == 'true' }}
-        continue-on-error: true
-        env:
-          TWINE_USERNAME: ${{ github.repository_owner }}
-          TWINE_PASSWORD: ${{ secrets.GH_PACKAGES_TOKEN || github.token }}
-        run: |
           python -m twine upload \
-            --repository-url https://pypi.pkg.github.com/${{ github.repository_owner }}/ \
+            --repository-url https://test.pypi.org/legacy/ \
             --verbose \
             dist/*
-
-      - name: Explain GitHub Packages failure
-        if: ${{ (github.event_name == 'push' || inputs.publish_to_github_packages == 'true') && steps.publish_gpr.outcome == 'failure' }}
-        run: |
-          echo "GitHub Packages publish failed (often 404 for Python registry availability/permissions)."
-          echo "Release artifacts are still published in GitHub Releases."
