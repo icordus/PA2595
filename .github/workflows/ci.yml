@@ -27,28 +27,30 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      - name: Download dataset for CI
-        run: |
-          set -e
-          mkdir -p "$GITHUB_WORKSPACE/data/raw"
-          rm -rf /tmp/student-data /tmp/student-performance.zip
-          curl -fL "https://archive.ics.uci.edu/static/public/320/student+performance.zip" -o /tmp/student-performance.zip
-          mkdir -p /tmp/student-data
-          unzip -o /tmp/student-performance.zip -d /tmp/student-data
-          DATASET_PATH="$(find /tmp/student-data -type f -name 'student-mat.csv' | head -n 1)"
-          if [ -z "$DATASET_PATH" ]; then
-            echo "student-mat.csv not found inside downloaded archive"
-            echo "Archive contents:" && find /tmp/student-data -maxdepth 3 -type f
-            exit 1
-          fi
-          cp "$DATASET_PATH" "$GITHUB_WORKSPACE/data/raw/student-mat.csv"
-          test -f "$GITHUB_WORKSPACE/data/raw/student-mat.csv"
-
-          echo "Copied dataset: $DATASET_PATH -> $GITHUB_WORKSPACE/data/raw/student-mat.csv"
-          ls -la "$GITHUB_WORKSPACE/data/raw"
       - name: Run pipeline
         run: |
+          set -e
           source venv/bin/activate
+          mkdir -p data/raw
+          if [ ! -f data/raw/student-mat.csv ]; then
+            rm -rf /tmp/student-data /tmp/student-performance.zip
+            curl -fL "https://archive.ics.uci.edu/static/public/320/student+performance.zip" -o /tmp/student-performance.zip
+            mkdir -p /tmp/student-data
+            unzip -o /tmp/student-performance.zip -d /tmp/student-data
+
+            DATASET_PATH="$(find /tmp/student-data -type f -name 'student-mat.csv' | head -n 1)"
+            if [ -z "$DATASET_PATH" ]; then
+              echo "student-mat.csv not found inside downloaded archive"
+              echo "Archive contents:" && find /tmp/student-data -maxdepth 5 -type f
+              exit 1
+            fi
+            cp "$DATASET_PATH" data/raw/student-mat.csv
+            echo "Copied dataset: $DATASET_PATH -> data/raw/student-mat.csv"
+          fi
+
+          test -f data/raw/student-mat.csv
+          ls -la data/raw
+
           python src/preprocess.py
           python src/train.py
           python src/evaluate.py
