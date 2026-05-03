@@ -5,6 +5,11 @@ on:
     tags:
       - "v*"
   workflow_dispatch:
+    inputs:
+      publish_to_github_packages:
+        description: "Attempt publish to GitHub Packages"
+        required: false
+        default: "false"
 
 permissions:
   contents: write
@@ -50,6 +55,7 @@ jobs:
             dist/*
 
       - name: Validate package publish credentials
+        if: ${{ github.event_name == 'push' || inputs.publish_to_github_packages == 'true' }}
         env:
           TWINE_PASSWORD: ${{ secrets.GH_PACKAGES_TOKEN || github.token }}
         run: |
@@ -59,6 +65,9 @@ jobs:
           fi
 
       - name: Publish to GitHub Packages
+        id: publish_gpr
+        if: ${{ github.event_name == 'push' || inputs.publish_to_github_packages == 'true' }}
+        continue-on-error: true
         env:
           TWINE_USERNAME: ${{ github.repository_owner }}
           TWINE_PASSWORD: ${{ secrets.GH_PACKAGES_TOKEN || github.token }}
@@ -67,3 +76,9 @@ jobs:
             --repository-url https://pypi.pkg.github.com/${{ github.repository_owner }}/ \
             --verbose \
             dist/*
+
+      - name: Explain GitHub Packages failure
+        if: ${{ (github.event_name == 'push' || inputs.publish_to_github_packages == 'true') && steps.publish_gpr.outcome == 'failure' }}
+        run: |
+          echo "GitHub Packages publish failed (often 404 for Python registry availability/permissions)."
+          echo "Release artifacts are still published in GitHub Releases."
