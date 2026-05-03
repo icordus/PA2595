@@ -18,9 +18,9 @@ python -m pip install -r requirements.txt
 echo "[3/5] Preprocessing data..."
 python src/preprocess.py
 
-echo "[4/5] Training models..."
+echo "[4/5] Training Decision Tree pipeline..."
 python src/train.py
 
-echo "[5/5] Evaluating models and starting Streamlit..."
+echo "[5/5] Evaluating pipeline and starting Streamlit..."
 python src/evaluate.py
 python -m streamlit run prototype/app.py

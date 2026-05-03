@@ -1,23 +1,17 @@
-"""
-predict.py
-----------
-Loads the best saved model and makes a single prediction given a dictionary
-of feature values. Used internally by the Streamlit prototype.
-
-Can also be run directly for a quick sanity check:
-    python src/predict.py
-"""
+"""Prediction helper for the saved Decision Tree pipeline artifact."""
 
 import os
 import joblib
 import pandas as pd
 
 MODELS_DIR = os.path.join(os.path.dirname(__file__), "..", "models")
+PIPELINE_FILE = "decision_tree_pipeline.pkl"
+FEATURE_COLUMNS_FILE = "feature_columns.pkl"
 
 
-def load_model(model_name: str = "random_forest"):
-    """Load a trained model by name from the models directory."""
-    model_path = os.path.join(MODELS_DIR, f"{model_name}.pkl")
+def load_model(model_name: str = "decision_tree_pipeline"):
+    """Load a trained pipeline artifact from the models directory."""
+    model_path = os.path.join(MODELS_DIR, PIPELINE_FILE if model_name == "decision_tree_pipeline" else f"{model_name}.pkl")
     if not os.path.exists(model_path):
         raise FileNotFoundError(
             f"Model '{model_name}' not found at {model_path}. Run train.py first."
@@ -27,20 +21,20 @@ def load_model(model_name: str = "random_forest"):
 
 def load_feature_columns() -> list:
     """Load the feature column order used during training."""
-    path = os.path.join(MODELS_DIR, "feature_columns.pkl")
+    path = os.path.join(MODELS_DIR, FEATURE_COLUMNS_FILE)
     if not os.path.exists(path):
         raise FileNotFoundError("feature_columns.pkl not found. Run train.py first.")
     return joblib.load(path)
 
 
-def predict(features: dict, model_name: str = "random_forest") -> dict:
+def predict(features: dict, model_name: str = "decision_tree_pipeline") -> dict:
     """
     Parameters
     ----------
     features : dict
         Keys are feature names, values are the input values.
     model_name : str
-        One of: 'decision_tree', 'random_forest', 'logistic_regression'
+        Default: 'decision_tree_pipeline'
 
     Returns
     -------
@@ -91,6 +85,6 @@ if __name__ == "__main__":
         "romantic": 0,
     }
 
-    result = predict(sample, model_name="random_forest")
+    result = predict(sample)
     print(f"Prediction : {result['label']}")
     print(f"Pass probability : {result['probability']:.2%}")

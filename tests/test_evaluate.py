@@ -4,7 +4,7 @@ import unittest
 
 import pandas as pd
 
-from src.evaluate import evaluate_model
+from src.evaluate import evaluate
 
 
 class DummyModel:
@@ -26,13 +26,13 @@ class TestEvaluate(unittest.TestCase):
         y_pred = [0, 1, 0, 0]
         X_test = pd.DataFrame({"feature": [1, 2, 3, 4]})
 
-        result = evaluate_model(DummyModel(y_pred), X_test, y_test, "dummy")
+        result = evaluate(DummyModel(y_pred), X_test, y_test)
 
-        self.assertEqual(result["model"], "dummy")
         self.assertAlmostEqual(result["accuracy"], 0.75)
         self.assertAlmostEqual(result["precision"], 1.0)
         self.assertAlmostEqual(result["recall"], 0.5)
         self.assertAlmostEqual(result["f1_score"], 2 / 3)
+        self.assertAlmostEqual(result["recall_fail"], 1.0)
 
 
 if __name__ == "__main__":

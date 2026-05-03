@@ -19,9 +19,9 @@ python -m pip install -r requirements.txt
 Write-Host "[3/5] Preprocessing data..."
 python src/preprocess.py
 
-Write-Host "[4/5] Training models..."
+Write-Host "[4/5] Training Decision Tree pipeline..."
 python src/train.py
 
-Write-Host "[5/5] Evaluating models and starting Streamlit..."
+Write-Host "[5/5] Evaluating pipeline and starting Streamlit..."
 python src/evaluate.py
 python -m streamlit run prototype/app.py

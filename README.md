@@ -8,13 +8,19 @@
 
 ## Project Overview
 
-This project predicts student academic performance (Pass / Fail) using supervised machine learning on structured educational and demographic data. Three models are compared:
+This project predicts student academic performance risk (Pass / Fail) using a **reproducible Decision Tree pipeline** on structured educational and demographic data.
 
-- **Decision Tree**
-- **Random Forest**
-- **Logistic Regression**
+The pipeline includes:
 
-Models are evaluated using Accuracy, Precision, Recall, F1-score, and Confusion Matrix. A simple Streamlit prototype allows users to enter student attributes and receive a real-time prediction.
+- Data loading and validation
+- Target creation from final grade (`G3 >= 10 => Pass`, otherwise `Fail`)
+- Leakage prevention by removing `G3` from model inputs
+- One-hot encoding for categorical features (inside sklearn pipeline)
+- Decision Tree training and evaluation
+- Result artifact storage (metrics and plots)
+- Streamlit decision-support prototype
+
+The model is evaluated using Accuracy, Precision, Recall, F1-score, and Confusion Matrix, with explicit attention to **Fail-class recall**.
 
 ---
 
@@ -41,11 +47,12 @@ PA2595/
 │   ├── 03_model_training.ipynb
 │   └── 04_evaluation.ipynb
 ├── src/
-│   ├── preprocess.py         # Data loading, cleaning, encoding, splitting
-│   ├── train.py              # Model training and saving
-│   ├── evaluate.py           # Metrics and confusion matrix
-│   └── predict.py            # Load saved model and predict
-├── models/                   # Saved trained model files (.pkl)
+│   ├── preprocess.py         # Load data, create target, split train/test
+│   ├── train.py              # One-hot + Decision Tree pipeline training
+│   ├── evaluate.py           # Metrics + confusion matrix + tree plot
+│   └── predict.py            # Load saved pipeline and predict
+├── models/                   # Saved pipeline artifact (.pkl)
+├── results/                  # metrics.txt, confusion_matrix.png, decision_tree.png
 ├── prototype/
 │   └── app.py                # Streamlit prediction prototype
 ├── report/                   # Report, timesheet, contribution statement
@@ -105,8 +112,8 @@ This command runs all steps in order:
 
 1. Installs dependencies (`python -m pip install -r requirements.txt`)
 2. Runs preprocessing
-3. Trains all models
-4. Evaluates models
+3. Trains Decision Tree pipeline
+4. Evaluates pipeline and saves result artifacts
 5. Starts the Streamlit prototype
 
 If `student-mat.csv` or `student-por.csv` is missing from `data/raw/`, the script stops and shows what to download.
@@ -133,6 +140,14 @@ python src/preprocess.py
 python src/train.py
 python src/evaluate.py
 ```
+
+Generated artifacts:
+
+- `models/decision_tree_pipeline.pkl`
+- `models/feature_columns.pkl`
+- `results/metrics.txt`
+- `results/confusion_matrix.png`
+- `results/decision_tree.png`
 
 ### Run the Streamlit prototype
 

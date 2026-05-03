@@ -4,11 +4,11 @@ import unittest
 
 import pandas as pd
 
-from src.preprocess import create_target, encode_features
+from src.preprocess import create_target, build_features_and_target
 
 
 class TestPreprocess(unittest.TestCase):
-    """Validate target creation and categorical encoding behavior."""
+    """Validate target creation and leakage-safe feature preparation."""
 
     def test_create_target_uses_threshold(self):
         """Students with G3 >= threshold should be labeled as Pass (1)."""
@@ -16,14 +16,20 @@ class TestPreprocess(unittest.TestCase):
         out = create_target(df, threshold=10)
         self.assertEqual(out["target"].tolist(), [0, 1, 1])
 
-    def test_encode_features_encodes_present_columns(self):
-        """Only existing categorical columns should be encoded to numeric labels."""
-        df = pd.DataFrame({"internet": ["yes", "no", "yes"], "studytime": [1, 2, 3]})
-        out = encode_features(df, ["internet", "higher"])
+    def test_build_features_and_target_removes_g3(self):
+        """G3 must be removed from X to avoid data leakage in training."""
+        df = pd.DataFrame(
+            {
+                "G3": [8, 14],
+                "studytime": [2, 3],
+                "internet": ["yes", "no"],
+                "target": [0, 1],
+            }
+        )
+        X, y = build_features_and_target(df)
 
-        self.assertIn("internet", out.columns)
-        self.assertEqual(sorted(out["internet"].unique().tolist()), [0, 1])
-        self.assertEqual(out["studytime"].tolist(), [1, 2, 3])
+        self.assertNotIn("G3", X.columns)
+        self.assertEqual(y.tolist(), [0, 1])
 
 
 if __name__ == "__main__":
