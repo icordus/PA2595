@@ -33,9 +33,12 @@ jobs:
           mkdir -p data/raw
           if [ ! -f data/raw/student-mat.csv ]; then
             curl -L "https://archive.ics.uci.edu/static/public/320/student+performance.zip" -o /tmp/student-performance.zip
-            python -c "import zipfile; zip_path='/tmp/student-performance.zip'; zipfile.ZipFile(zip_path, 'r').extractall('data/raw')"
-          fi
 
+            unzip -o /tmp/student-performance.zip -d /tmp/student-data
+
+            cp /tmp/student-data/student/student-mat.csv data/raw/
+          fi
+          ls -R data/raw
       - name: Run pipeline
         run: |
           source venv/bin/activate
