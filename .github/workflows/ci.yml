@@ -9,10 +9,10 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@v4
 
       - name: Set up Python
-        uses: actions/setup-python@v6
+        uses: actions/setup-python@v5
         with:
           python-version: "3.11"
           cache: "pip"
@@ -27,9 +27,19 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
+      - name: Download dataset for CI
+        run: |
+          set -e
+          mkdir -p data/raw
+          if [ ! -f data/raw/student-mat.csv ]; then
+            curl -L "https://archive.ics.uci.edu/static/public/320/student+performance.zip" -o /tmp/student-performance.zip
+            python -c "import zipfile; zip_path='/tmp/student-performance.zip'; zipfile.ZipFile(zip_path, 'r').extractall('data/raw')"
+          fi
+
       - name: Run pipeline
         run: |
           source venv/bin/activate
+          python src/preprocess.py
           python src/train.py
           python src/evaluate.py
 
