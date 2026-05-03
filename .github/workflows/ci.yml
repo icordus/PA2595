@@ -17,15 +17,23 @@ jobs:
           python-version: "3.11"
           cache: "pip"
 
+      - name: Create virtual environment
+        run: |
+          python -m venv venv
+
       - name: Install dependencies
         run: |
+          source venv/bin/activate
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      - name: Check syntax
+      - name: Run pipeline
         run: |
-          python -m compileall src prototype
+          source venv/bin/activate
+          python src/train.py
+          python src/evaluate.py
 
       - name: Run tests
         run: |
+          source venv/bin/activate
           python -m unittest discover -s tests -p "test_*.py"
