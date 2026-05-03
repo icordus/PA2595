@@ -33,7 +33,6 @@ jobs:
           source venv/bin/activate
           mkdir -p data/raw
           if [ ! -f $GITHUB_WORKSPACE/data/raw/student-mat.csv ]; then
-            rm -rf /tmp/student-data /tmp/student-performance.zip
             curl -fL "https://archive.ics.uci.edu/static/public/320/student+performance.zip" -o /tmp/student-performance.zip
             mkdir -p /tmp/student-data
             unzip -o /tmp/student-performance.zip -d /tmp/student-data
