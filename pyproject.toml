@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "pa2595-student-risk"
-version = "0.1.4"
+version = "0.1.5"
 description = "Decision Tree pipeline for student performance risk prediction"
 readme = "README.md"
 requires-python = ">=3.11"
