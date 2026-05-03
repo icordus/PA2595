@@ -8,48 +8,60 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      # Get the repository content on the runner.
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
+      # Install the Python version used by this project.
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: "3.11"
           cache: "pip"
 
+      # Create an isolated virtual environment for CI commands.
       - name: Create virtual environment
         run: |
+          # Create a clean Python virtual environment.
           python -m venv venv
 
+      # Install all Python dependencies required by the project.
       - name: Install dependencies
         run: |
+          # Activate venv and install dependencies from requirements.txt.
           source venv/bin/activate
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      - name: Run pipeline
+      # Download and extract the dataset needed by preprocess.py.
+      - name: Download dataset for CI
         run: |
+          # Ensure student-mat.csv exists in data/raw for pipeline execution.
           set -e
-          source venv/bin/activate
-          mkdir -p data/raw
-          if [ ! -f $GITHUB_WORKSPACE/data/raw/student-mat.csv ]; then
+          mkdir -p "$GITHUB_WORKSPACE/data/raw"
+          if [ ! -f "$GITHUB_WORKSPACE/data/raw/student-mat.csv" ]; then
             curl -fL "https://archive.ics.uci.edu/static/public/320/student+performance.zip" -o /tmp/student-performance.zip
             mkdir -p /tmp/student-data
             unzip -o /tmp/student-performance.zip -d /tmp/student-data
             unzip -o /tmp/student-data/student.zip -d /tmp/student-data/inner
             DATASET_PATH="/tmp/student-data/inner/student-mat.csv"
-            cp "$DATASET_PATH" $GITHUB_WORKSPACE/data/raw/student-mat.csv
+            cp "$DATASET_PATH" "$GITHUB_WORKSPACE/data/raw/student-mat.csv"
             echo "Copied dataset: $DATASET_PATH -> $GITHUB_WORKSPACE/data/raw/student-mat.csv"
           fi
 
-          test -f data/raw/student-mat.csv
-          ls -la data/raw
-
+      # Run preprocessing, training, and evaluation scripts.
+      - name: Run pipeline
+        run: |
+          # Execute the ML pipeline end-to-end.
+          set -e
+          source venv/bin/activate
           python src/preprocess.py
           python src/train.py
           python src/evaluate.py
 
+      # Run unit tests to verify core logic.
       - name: Run tests
         run: |
+          # Execute all unittest files that match test_*.py.
           source venv/bin/activate
           python -m unittest discover -s tests -p "test_*.py"
