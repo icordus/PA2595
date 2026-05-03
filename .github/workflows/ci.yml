@@ -32,15 +32,15 @@ jobs:
           set -e
           source venv/bin/activate
           mkdir -p data/raw
-          if [ ! -f data/raw/student-mat.csv ]; then
+          if [ ! -f $GITHUB_WORKSPACE/data/raw/student-mat.csv ]; then
             rm -rf /tmp/student-data /tmp/student-performance.zip
             curl -fL "https://archive.ics.uci.edu/static/public/320/student+performance.zip" -o /tmp/student-performance.zip
             mkdir -p /tmp/student-data
             unzip -o /tmp/student-performance.zip -d /tmp/student-data
-            find /tmp/student-data -type f -name 'student.zip' -exec unzip -o {} -d /tmp/student-data/inner \;
-            DATASET_PATH="$(find /tmp/student-data -type f -name 'student-mat.csv' | head -n 1)"
-            cp "$DATASET_PATH" data/raw/student-mat.csv
-            echo "Copied dataset: $DATASET_PATH -> data/raw/student-mat.csv"
+            unzip -o /tmp/student-data/student.zip -d /tmp/student-data/inner
+            DATASET_PATH="/tmp/student-data/inner/student-mat.csv"
+            cp "$DATASET_PATH" $GITHUB_WORKSPACE/data/raw/student-mat.csv
+            echo "Copied dataset: $DATASET_PATH -> $GITHUB_WORKSPACE/data/raw/student-mat.csv"
           fi
 
           test -f data/raw/student-mat.csv
