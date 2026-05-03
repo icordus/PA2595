@@ -62,6 +62,10 @@ BINARY_COLS = [
 
 
 def load_data(raw_dir: str, filename: str) -> pd.DataFrame:
+    """Load the raw UCI CSV file from disk.
+
+    The dataset is expected to be semicolon-separated, as distributed by UCI.
+    """
     filepath = os.path.join(raw_dir, filename)
     if not os.path.exists(filepath):
         raise FileNotFoundError(
@@ -76,6 +80,10 @@ def load_data(raw_dir: str, filename: str) -> pd.DataFrame:
 
 
 def create_target(df: pd.DataFrame, threshold: int = PASS_THRESHOLD) -> pd.DataFrame:
+    """Create a binary target column named `target` from `G3`.
+
+    `target` is 1 (Pass) when G3 >= threshold, otherwise 0 (Fail).
+    """
     df = df.copy()
     df["target"] = (df["G3"] >= threshold).astype(int)
     print(f"Target distribution:\n{df['target'].value_counts().rename({0: 'Fail', 1: 'Pass'})}")
@@ -83,6 +91,10 @@ def create_target(df: pd.DataFrame, threshold: int = PASS_THRESHOLD) -> pd.DataF
 
 
 def encode_features(df: pd.DataFrame, binary_cols: list) -> pd.DataFrame:
+    """Label-encode selected categorical columns.
+
+    This function only encodes columns that are present in the DataFrame.
+    """
     df = df.copy()
     le = LabelEncoder()
     for col in binary_cols:
@@ -92,6 +104,7 @@ def encode_features(df: pd.DataFrame, binary_cols: list) -> pd.DataFrame:
 
 
 def preprocess(raw_dir: str = RAW_DIR, processed_dir: str = PROCESSED_DIR) -> None:
+    """Run the full preprocessing pipeline and save train/test CSV files."""
     os.makedirs(processed_dir, exist_ok=True)
 
     df = load_data(raw_dir, DATASET_FILE)

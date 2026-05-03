@@ -16,6 +16,7 @@ MODELS_DIR = os.path.join(os.path.dirname(__file__), "..", "models")
 
 
 def load_model(model_name: str = "random_forest"):
+    """Load a trained model by name from the models directory."""
     model_path = os.path.join(MODELS_DIR, f"{model_name}.pkl")
     if not os.path.exists(model_path):
         raise FileNotFoundError(
@@ -25,6 +26,7 @@ def load_model(model_name: str = "random_forest"):
 
 
 def load_feature_columns() -> list:
+    """Load the feature column order used during training."""
     path = os.path.join(MODELS_DIR, "feature_columns.pkl")
     if not os.path.exists(path):
         raise FileNotFoundError("feature_columns.pkl not found. Run train.py first.")

@@ -49,7 +49,13 @@ PA2595/
 ├── prototype/
 │   └── app.py                # Streamlit prediction prototype
 ├── report/                   # Report, timesheet, contribution statement
+├── tests/
+│   ├── test_preprocess.py
+│   ├── test_evaluate.py
+│   └── test_predict.py
 ├── ROADMAP.md                # Project plan and milestones
+├── start.sh                  # One-command pipeline start (bash)
+├── start.ps1                 # One-command pipeline start (PowerShell)
 ├── requirements.txt
 └── README.md
 ```
@@ -69,7 +75,7 @@ venv\Scripts\activate        # Windows
 ### 2. Install dependencies
 
 ```bash
-pip install -r requirements.txt
+python -m pip install -r requirements.txt
 ```
 
 ### 3. Download the dataset
@@ -80,6 +86,40 @@ and place it in `data/raw/`.
 ---
 
 ## Running the Pipeline
+
+### One-command start (recommended)
+
+Linux/macOS/Git Bash:
+
+```bash
+bash start.sh
+```
+
+Windows PowerShell:
+
+```powershell
+.\start.ps1
+```
+
+This command runs all steps in order:
+
+1. Installs dependencies (`python -m pip install -r requirements.txt`)
+2. Runs preprocessing
+3. Trains all models
+4. Evaluates models
+5. Starts the Streamlit prototype
+
+If `student-mat.csv` or `student-por.csv` is missing from `data/raw/`, the script stops and shows what to download.
+
+In PowerShell, if script execution is blocked on your machine, run this once in that terminal:
+
+```powershell
+Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
+```
+
+---
+
+### Manual run (step by step)
 
 ### Preprocess data
 
@@ -97,7 +137,31 @@ python src/evaluate.py
 ### Run the Streamlit prototype
 
 ```bash
-streamlit run prototype/app.py
+python -m streamlit run prototype/app.py
+```
+
+### Run unit tests
+
+```bash
+python -m unittest discover -s tests -v
+```
+
+If you use the project virtual environment directly:
+
+```bash
+venv/Scripts/python -m unittest discover -s tests -v
+```
+
+Run a single test file:
+
+```bash
+venv/Scripts/python -m unittest tests/test_predict.py -v
+```
+
+Run a single test case:
+
+```bash
+venv/Scripts/python -m unittest tests.test_predict.TestPredict.test_predict_returns_label_and_probability -v
 ```
 
 ---

@@ -33,12 +33,14 @@ MODEL_NAMES = ["decision_tree", "random_forest", "logistic_regression"]
 
 
 def load_test_data(processed_dir: str):
+    """Load preprocessed test features and labels from CSV files."""
     X_test = pd.read_csv(os.path.join(processed_dir, "X_test.csv"))
     y_test = pd.read_csv(os.path.join(processed_dir, "y_test.csv")).squeeze()
     return X_test, y_test
 
 
 def evaluate_model(model, X_test, y_test, model_name: str) -> dict:
+    """Evaluate a model and return core classification metrics as a dictionary."""
     y_pred = model.predict(X_test)
 
     acc = accuracy_score(y_test, y_pred)
@@ -71,6 +73,7 @@ def evaluate_model(model, X_test, y_test, model_name: str) -> dict:
 
 
 def evaluate_all(processed_dir: str = PROCESSED_DIR, models_dir: str = MODELS_DIR) -> None:
+    """Evaluate all saved models, print per-model reports, and print a summary table."""
     X_test, y_test = load_test_data(processed_dir)
     results = []
 

@@ -46,12 +46,14 @@ MODELS = {
 
 
 def load_processed_data(processed_dir: str):
+    """Load preprocessed training features and labels from CSV files."""
     X_train = pd.read_csv(os.path.join(processed_dir, "X_train.csv"))
     y_train = pd.read_csv(os.path.join(processed_dir, "y_train.csv")).squeeze()
     return X_train, y_train
 
 
 def train_all(processed_dir: str = PROCESSED_DIR, models_dir: str = MODELS_DIR) -> None:
+    """Train all configured models and persist them to the models directory."""
     os.makedirs(models_dir, exist_ok=True)
 
     X_train, y_train = load_processed_data(processed_dir)
