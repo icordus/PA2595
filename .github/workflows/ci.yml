@@ -59,6 +59,14 @@ jobs:
           python src/train.py
           python src/evaluate.py
 
+      # Upload pipeline result artifacts so they can be downloaded from the Actions UI.
+      - name: Upload pipeline results
+        uses: actions/upload-artifact@v4
+        with:
+          name: pipeline-results
+          path: results/
+          if-no-files-found: error
+
       # Run unit tests to verify core logic.
       - name: Run tests
         run: |
