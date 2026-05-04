@@ -1,0 +1,4 @@
+--index-url https://test.pypi.org/simple/
+--extra-index-url https://pypi.org/simple/
+
+pa2595-student-risk==0.1.7

@@ -80,6 +80,14 @@ venv\Scripts\activate        # Windows
 python -m pip install -r requirements.txt
 ```
 
+If you want to install the published package version from TestPyPI instead of using the local source code, use:
+
+```bash
+python -m pip install -r requirements-package.txt
+```
+
+`requirements-package.txt` installs the published `pa2595-student-risk` package from TestPyPI and uses the normal PyPI index for third-party dependencies such as pandas and scikit-learn.
+
 ### 3. Download the dataset
 
 Download `student-mat.csv` from https://archive.ics.uci.edu/dataset/320/student%2Bperformance  
