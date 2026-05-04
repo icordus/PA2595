@@ -41,11 +41,6 @@ PA2595/
 ├── data/
 │   ├── raw/                  # Original downloaded dataset
 │   └── processed/            # Cleaned and encoded data
-├── notebooks/
-│   ├── 01_data_exploration.ipynb
-│   ├── 02_preprocessing.ipynb
-│   ├── 03_model_training.ipynb
-│   └── 04_evaluation.ipynb
 ├── src/
 │   ├── preprocess.py         # Load data, create target, split train/test
 │   ├── train.py              # One-hot + Decision Tree pipeline training
