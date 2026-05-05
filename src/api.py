@@ -13,7 +13,7 @@ app = FastAPI(
 
 
 class StudentInput(BaseModel):
-    studytime: int = Field(..., ge=1, le=4, description="Weekly study time (1–4)")
+    studytime: int = Field(..., ge=1, description="Weekly study time (hours)")
     failures: int = Field(..., ge=0, le=4, description="Number of past class failures")
     absences: int = Field(..., ge=0, description="Number of school absences")
     G1: int = Field(..., ge=0, le=20, description="First period grade (0–20)")
