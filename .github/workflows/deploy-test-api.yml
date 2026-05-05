@@ -17,18 +17,32 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
+      # Install the Python version used by this project.
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.11"
+          cache: "pip"
 
-      - name: Install Python test dependencies
+      # Create an isolated virtual environment for CI commands.
+      - name: Create virtual environment
         run: |
+          # Create a clean Python virtual environment.
           python -m venv venv
+
+      # Install all Python dependencies required by the project.
+      - name: Install dependencies
+        run: |
+          # Activate venv and install dependencies from requirements.txt.
           source venv/bin/activate
-          pip install --upgrade pip
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
           pip install -r requirements-package.txt
 
       - name: Build Docker image
         run: |
-          docker build -f Dockerfile.api -t ${IMAGE_NAME}:${IMAGE_TAG} .
+          docker build -f Dockerfile -t ${IMAGE_NAME}:${IMAGE_TAG} .
 
       - name: Deploy with Helm
         run: |
