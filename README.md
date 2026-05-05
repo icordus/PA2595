@@ -55,7 +55,12 @@ PA2595/
 ├── tests/
 │   ├── test_preprocess.py
 │   ├── test_evaluate.py
-│   └── test_predict.py
+│   ├── test_predict.py
+│   └── api/
+│       └── test_api.py
+├── helm/
+│   └── pa2595-api/          # Helm chart for API deployment (Kubernetes)
+├── Dockerfile               # Container image build for FastAPI
 ├── ROADMAP.md                # Project plan and milestones
 ├── start.sh                  # One-command pipeline start (bash)
 ├── start.ps1                 # One-command pipeline start (PowerShell)
@@ -225,10 +230,64 @@ Run a single test file:
 venv/Scripts/python -m unittest tests/test_predict.py -v
 ```
 
+Run only API tests:
+
+```bash
+python -m unittest tests.api.test_api -v
+```
+
 Run a single test case:
 
 ```bash
 venv/Scripts/python -m unittest tests.test_predict.TestPredict.test_predict_returns_label_and_probability -v
+```
+
+### Run with Docker
+
+Build image:
+
+```bash
+docker build -t pa2595-api:latest .
+```
+
+Run container:
+
+```bash
+docker run --rm -p 8000:8000 pa2595-api:latest
+```
+
+Test health endpoint:
+
+```bash
+curl http://localhost:8000/health
+```
+
+### Deploy with Helm (Kubernetes)
+
+Render templates locally:
+
+```bash
+helm template pa2595-api helm/pa2595-api
+```
+
+Install chart:
+
+```bash
+helm install pa2595-api helm/pa2595-api \
+  --set image.repository=pa2595-api \
+  --set image.tag=latest
+```
+
+Upgrade chart:
+
+```bash
+helm upgrade pa2595-api helm/pa2595-api
+```
+
+Uninstall chart:
+
+```bash
+helm uninstall pa2595-api
 ```
 
 ---
