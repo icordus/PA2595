@@ -1,7 +1,7 @@
 replicaCount: 1
 
 image:
-  repository: pa2595-api
+  repository: student-risk-api
   pullPolicy: IfNotPresent
   tag: "latest"
 

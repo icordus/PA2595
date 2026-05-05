@@ -1,0 +1,54 @@
+name: Deploy and Test API
+
+on:
+  workflow_dispatch:
+
+jobs:
+  deploy-and-test:
+    runs-on: [self-hosted, linux, ARM64]
+
+    env:
+      APP_NAME: student-risk-api
+      IMAGE_NAME: student-risk-api
+      IMAGE_TAG: "0.1.9"
+      NODE_IP: "192.168.0.71"
+      NODE_PORT: "30080"
+      BASE_URL: "http://192.168.0.71:30080"
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Python test dependencies
+        run: |
+          python3 -m pip install --upgrade pip
+          python3 -m pip install -r requirements-package.txt
+
+      - name: Build Docker image
+        run: |
+          docker build -f Dockerfile.api -t ${IMAGE_NAME}:${IMAGE_TAG} .
+
+      - name: Deploy with Helm
+        run: |
+          helm upgrade --install ${APP_NAME} ./helm/student-risk-api \
+            --set image.repository=${IMAGE_NAME} \
+            --set image.tag=${IMAGE_TAG} \
+            --set image.pullPolicy=Never \
+            --set service.type=NodePort \
+            --set service.nodePort=${NODE_PORT}
+
+      - name: Rollout status
+        run: |
+          kubectl rollout status deployment/${APP_NAME} --timeout=180s
+
+      - name: Smoke test /health
+        run: |
+          curl -f ${BASE_URL}/health
+
+      - name: API regression tests
+        run: |
+          BASE_URL=${BASE_URL} python3 -m pytest tests/api -v
+
+      - name: Test selection (--lf)
+        run: |
+          BASE_URL=${BASE_URL} python3 -m pytest tests/api -v --lf

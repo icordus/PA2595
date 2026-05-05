@@ -1,21 +1,21 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "pa2595-api.fullname" . }}
+  name: {{ include "student-risk-api.fullname" . }}
   labels:
-    {{- include "pa2595-api.labels" . | nindent 4 }}
+    {{- include "student-risk-api.labels" . | nindent 4 }}
 spec:
   replicas: {{ .Values.replicaCount }}
   selector:
     matchLabels:
-      {{- include "pa2595-api.selectorLabels" . | nindent 6 }}
+      {{- include "student-risk-api.selectorLabels" . | nindent 6 }}
   template:
     metadata:
       labels:
-        {{- include "pa2595-api.selectorLabels" . | nindent 8 }}
+        {{- include "student-risk-api.selectorLabels" . | nindent 8 }}
     spec:
       containers:
-        - name: pa2595-api
+        - name: student-risk-api
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           ports:
