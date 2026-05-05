@@ -16,7 +16,7 @@ permissions:
 
 jobs:
   release:
-    runs-on: ubuntu-latest
+    runs-on: raspberrypi2
 
     steps:
       - name: Checkout repository
