@@ -17,6 +17,7 @@ dynamic = ["dependencies"]
 pa2595-preprocess = "src.preprocess:preprocess"
 pa2595-train = "src.train:train"
 pa2595-evaluate = "src.evaluate:evaluate_pipeline"
+pa2595-api = "src.api:run"
 
 [tool.setuptools.dynamic]
 dependencies = { file = ["requirements.txt"] }

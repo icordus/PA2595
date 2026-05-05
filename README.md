@@ -45,7 +45,8 @@ PA2595/
 │   ├── preprocess.py         # Load data, create target, split train/test
 │   ├── train.py              # One-hot + Decision Tree pipeline training
 │   ├── evaluate.py           # Metrics + confusion matrix + tree plot
-│   └── predict.py            # Load saved pipeline and predict
+│   ├── predict.py            # Load saved pipeline and predict
+│   └── api.py                # FastAPI REST API (GET /health, POST /predict)
 ├── models/                   # Saved pipeline artifact (.pkl)
 ├── results/                  # metrics.txt, confusion_matrix.png, decision_tree.png
 ├── prototype/
@@ -54,7 +55,12 @@ PA2595/
 ├── tests/
 │   ├── test_preprocess.py
 │   ├── test_evaluate.py
-│   └── test_predict.py
+│   ├── test_predict.py
+│   └── api/
+│       └── test_api.py
+├── helm/
+│   └── pa2595-api/          # Helm chart for API deployment (Kubernetes)
+├── Dockerfile               # Container image build for FastAPI
 ├── ROADMAP.md                # Project plan and milestones
 ├── start.sh                  # One-command pipeline start (bash)
 ├── start.ps1                 # One-command pipeline start (PowerShell)
@@ -158,6 +164,54 @@ Generated artifacts:
 python -m streamlit run prototype/app.py
 ```
 
+### Run the REST API
+
+```bash
+uvicorn src.api:app --reload --port 8000
+```
+
+Or via the installed entry point:
+
+```bash
+pa2595-api
+```
+
+The API will be available at `http://localhost:8000`.  
+Interactive documentation (Swagger UI) is at `http://localhost:8000/docs`.
+
+#### Endpoints
+
+| Method | Path | Description |
+|--------|------|-------------|
+| GET | `/health` | Check if the API is running |
+| POST | `/predict` | Predict pass/fail risk for a student |
+
+#### Example: student who passes
+
+```bash
+curl -X POST http://localhost:8000/predict \
+  -H "Content-Type: application/json" \
+  -d '{"studytime": 3, "failures": 0, "absences": 2, "G1": 15, "G2": 16}'
+```
+
+```json
+{"prediction": "pass", "risk": "low", "score": 15.5, "probability": 0.95, "source": "model"}
+```
+
+#### Example: student who fails
+
+```bash
+curl -X POST http://localhost:8000/predict \
+  -H "Content-Type: application/json" \
+  -d '{"studytime": 1, "failures": 2, "absences": 25, "G1": 6, "G2": 7}'
+```
+
+```json
+{"prediction": "fail", "risk": "high", "score": 6.5, "probability": 0.12, "source": "model"}
+```
+
+> **Note:** If no trained model is found, the API falls back to a grade-based heuristic and returns `"source": "heuristic"`. Run the pipeline first to generate the model artifacts.
+
 ### Run unit tests
 
 ```bash
@@ -176,10 +230,64 @@ Run a single test file:
 venv/Scripts/python -m unittest tests/test_predict.py -v
 ```
 
+Run only API tests:
+
+```bash
+python -m unittest tests.api.test_api -v
+```
+
 Run a single test case:
 
 ```bash
 venv/Scripts/python -m unittest tests.test_predict.TestPredict.test_predict_returns_label_and_probability -v
+```
+
+### Run with Docker
+
+Build image:
+
+```bash
+docker build -t pa2595-api:latest .
+```
+
+Run container:
+
+```bash
+docker run --rm -p 8000:8000 pa2595-api:latest
+```
+
+Test health endpoint:
+
+```bash
+curl http://localhost:8000/health
+```
+
+### Deploy with Helm (Kubernetes)
+
+Render templates locally:
+
+```bash
+helm template pa2595-api helm/pa2595-api
+```
+
+Install chart:
+
+```bash
+helm install pa2595-api helm/pa2595-api \
+  --set image.repository=pa2595-api \
+  --set image.tag=latest
+```
+
+Upgrade chart:
+
+```bash
+helm upgrade pa2595-api helm/pa2595-api
+```
+
+Uninstall chart:
+
+```bash
+helm uninstall pa2595-api
 ```
 
 ---
