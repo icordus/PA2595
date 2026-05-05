@@ -21,8 +21,10 @@ jobs:
 
       - name: Install Python test dependencies
         run: |
-          python3 -m pip install --upgrade pip
-          python3 -m pip install -r requirements-package.txt
+          python -m venv venv
+          source venv/bin/activate
+          pip install --upgrade pip
+          pip install -r requirements-package.txt
 
       - name: Build Docker image
         run: |
@@ -51,4 +53,4 @@ jobs:
 
       - name: Test selection (--lf)
         run: |
-          BASE_URL=${BASE_URL} python3 -m pytest tests/api -v --lf
+          BASE_URL=${BASE_URL} python -m pytest tests/api -v --lf
