@@ -5,7 +5,7 @@ on:
 
 jobs:
   build-and-test:
-    runs-on: ubuntu-latest
+    runs-on: raspberrypi2
 
     steps:
       # Get the repository content on the runner.
