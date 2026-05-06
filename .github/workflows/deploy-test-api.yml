@@ -13,7 +13,7 @@ jobs:
       IMAGE_TAG: "0.1.10"
       NODE_IP: "192.168.0.71"
       NODE_PORT: "30080"
-      BASE_URL: "http://192.168.0.71:30080"
+      BASE_URL: "http://192.168.0.71"
 
     steps:
       - name: Checkout
@@ -24,21 +24,6 @@ jobs:
         with:
           python-version: "3.11"
           cache: "pip"
-
-      # Create an isolated virtual environment for CI commands.
-      - name: Create virtual environment
-        run: |
-          # Create a clean Python virtual environment.
-          python -m venv venv
-
-      # Install all Python dependencies required by the project.
-      - name: Install dependencies
-        run: |
-          # Activate venv and install dependencies from requirements.txt.
-          source venv/bin/activate
-          python -m pip install --upgrade pip
-          pip install -r requirements.txt
-          pip install -r requirements-package.txt
 
       - name: Build Docker image
         run: |
@@ -68,8 +53,8 @@ jobs:
 
       - name: API regression tests
         run: |
-          BASE_URL=${BASE_URL} python3 -m pytest tests/api -v
+          BASE_URL=${BASE_URL}:${NODE_PORT} python3 -m pytest tests/api -v
 
       - name: Test selection (--lf)
         run: |
-          BASE_URL=${BASE_URL} python -m pytest tests/api -v --lf
+          BASE_URL=${BASE_URL}:${NODE_PORT} python -m pytest tests/api -v --lf
