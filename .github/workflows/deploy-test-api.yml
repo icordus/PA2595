@@ -25,13 +25,6 @@ jobs:
           python-version: "3.11"
           cache: "pip"
 
-      - name: Install Python test dependencies
-        run: |
-          python -m venv venv
-          source venv/bin/activate
-          python -m pip install --upgrade pip
-          python -m pip install -r requirements.txt
-
       - name: Build Docker image
         run: |
           docker build -f Dockerfile -t ${IMAGE_NAME}:${IMAGE_TAG} .
@@ -60,8 +53,15 @@ jobs:
 
       - name: API regression tests
         run: |
-          BASE_URL=${BASE_URL}:${NODE_PORT} python3 -m pytest tests/api -v
+          python -m venv venv
+          source venv/bin/activate
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements.txt
+          export BASE_URL=${BASE_URL}:${NODE_PORT} 
+          python3 -m pytest tests/api -v
 
       - name: Test selection (--lf)
         run: |
-          BASE_URL=${BASE_URL}:${NODE_PORT} python -m pytest tests/api -v --lf
+          source venv/bin/activate
+          export BASE_URL=${BASE_URL}:${NODE_PORT} 
+          python -m pytest tests/api -v --lf
