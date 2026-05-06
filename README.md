@@ -59,7 +59,7 @@ PA2595/
 │   └── api/
 │       └── test_api.py
 ├── helm/
-│   └── pa2595-api/          # Helm chart for API deployment (Kubernetes)
+│   └── student-risk-api/          # Helm chart for API deployment (Kubernetes)
 ├── Dockerfile               # Container image build for FastAPI
 ├── ROADMAP.md                # Project plan and milestones
 ├── start.sh                  # One-command pipeline start (bash)
@@ -173,7 +173,7 @@ uvicorn src.api:app --reload --port 8000
 Or via the installed entry point:
 
 ```bash
-pa2595-api
+student-risk-api
 ```
 
 The API will be available at `http://localhost:8000`.  
@@ -247,13 +247,13 @@ venv/Scripts/python -m unittest tests.test_predict.TestPredict.test_predict_retu
 Build image:
 
 ```bash
-docker build -t pa2595-api:latest .
+docker build -t student-risk-api:latest .
 ```
 
 Run container:
 
 ```bash
-docker run --rm -p 8000:8000 pa2595-api:latest
+docker run --rm -p 8000:8000 student-risk-api:latest
 ```
 
 Test health endpoint:
@@ -267,27 +267,27 @@ curl http://localhost:8000/health
 Render templates locally:
 
 ```bash
-helm template pa2595-api helm/pa2595-api
+helm template student-risk-api helm/student-risk-api
 ```
 
 Install chart:
 
 ```bash
-helm install pa2595-api helm/pa2595-api \
-  --set image.repository=pa2595-api \
+helm install student-risk-api helm/student-risk-api \
+  --set image.repository=student-risk-api \
   --set image.tag=latest
 ```
 
 Upgrade chart:
 
 ```bash
-helm upgrade pa2595-api helm/pa2595-api
+helm upgrade student-risk-api helm/student-risk-api
 ```
 
 Uninstall chart:
 
 ```bash
-helm uninstall pa2595-api
+helm uninstall student-risk-api
 ```
 
 ---

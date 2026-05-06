@@ -1,6 +1,6 @@
 FROM python:3.11-slim
 
-LABEL version="0.1.8"
+LABEL version="0.1.10"
 
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1

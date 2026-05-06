@@ -10,7 +10,7 @@ jobs:
     env:
       APP_NAME: student-risk-api
       IMAGE_NAME: student-risk-api
-      IMAGE_TAG: "0.1.9"
+      IMAGE_TAG: "0.1.10"
       NODE_IP: "192.168.0.71"
       NODE_PORT: "30080"
       BASE_URL: "http://192.168.0.71:30080"
@@ -43,6 +43,11 @@ jobs:
       - name: Build Docker image
         run: |
           docker build -f Dockerfile -t ${IMAGE_NAME}:${IMAGE_TAG} .
+
+      - name: Load into containerd
+        run: |
+          docker save ${IMAGE_NAME}:${IMAGE_TAG} -o img.tar
+          sudo ctr -n k8s.io images import img.tar
 
       - name: Deploy with Helm
         run: |
