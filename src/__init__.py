@@ -1,1 +1,1 @@
-# This file marks src/ as a Python package.
+"""Source package for the Student Performance Decision Tree project."""
