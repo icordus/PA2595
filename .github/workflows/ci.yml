@@ -55,9 +55,9 @@ jobs:
           # Execute the ML pipeline end-to-end.
           set -e
           source venv/bin/activate
-          python src/preprocess.py
-          python src/train.py
-          python src/evaluate.py
+          python -m src.preprocess
+          python -m src.train --data data/raw/student-mat.csv
+          python -m src.predict --data data/raw/student-mat.csv
 
       # Upload pipeline result artifacts so they can be downloaded from the Actions UI.
       - name: Upload pipeline results
@@ -70,6 +70,6 @@ jobs:
       # Run unit tests to verify core logic.
       - name: Run tests
         run: |
-          # Execute all unittest files that match test_*.py.
+          # Execute the project test suite.
           source venv/bin/activate
-          python -m unittest discover -s tests -p "test_*.py"
+          python -m pytest -q
