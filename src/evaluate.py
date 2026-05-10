@@ -27,6 +27,18 @@ from sklearn.metrics import (
 # plot_tree is used to create a visual representation of the trained Decision Tree
 from sklearn.tree import plot_tree
 
+
+def evaluate(model, X_test, y_test) -> dict:
+    """Evaluate predictions on test data using metrics expected by unit tests."""
+    y_pred = model.predict(X_test)
+    return {
+        "accuracy": accuracy_score(y_test, y_pred),
+        "precision": precision_score(y_test, y_pred, zero_division=0),
+        "recall": recall_score(y_test, y_pred, zero_division=0),
+        "f1_score": f1_score(y_test, y_pred, zero_division=0),
+        "recall_fail": recall_score(y_test, y_pred, pos_label=0, zero_division=0),
+    }
+
 def evaluate_classifier(model, X_train, X_test, y_train, y_test) -> dict:
     """Evaluate the trained model  
     model:The trained sklearn pipeline
