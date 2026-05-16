@@ -6,7 +6,6 @@ import argparse
 
 # joblib is used to load the saved machine learning pipeline from the models folder
 import joblib
-import pandas as pd
 
 # MODEL_PATH contains the location of the saved trained model pipeline
 from src.config import MODEL_PATH
@@ -51,33 +50,6 @@ def predict_single_student(student_row):
 
     # This returns both the readable prediction and the probability values
     return label, probability
-
-
-def load_feature_columns() -> list[str]:
-    """Return expected feature column names from the trained model artifact."""
-    model = load_model()
-    columns = getattr(model, "feature_names_in_", None)
-    if columns is None:
-        raise ValueError("Model does not expose feature_names_in_.")
-    return list(columns)
-
-
-def predict(features: dict) -> dict:
-    """Predict label and pass probability for a single feature dictionary."""
-    model = load_model()
-    columns = load_feature_columns()
-
-    row = {col: 0 for col in columns}
-    row.update(features)
-    student_df = pd.DataFrame([row], columns=columns)
-
-    prediction = model.predict(student_df)[0]
-    probability = float(model.predict_proba(student_df)[0][1])
-
-    return {
-        "label": "Pass" if prediction == 1 else "Fail",
-        "probability": probability,
-    }
 
 
 def demo_prediction(csv_path: str):
