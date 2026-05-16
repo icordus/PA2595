@@ -5,13 +5,13 @@ on:
 
 jobs:
   deploy-and-test:
-    runs-on: [self-hosted, linux, ARM64]
+    runs-on: raspberrypi2
 
     env:
       APP_NAME: student-risk-api
+      NAMESPACE: student-risk-api
       IMAGE_NAME: student-risk-api
       IMAGE_TAG: "0.1.10"
-      NODE_IP: "192.168.0.71"
       NODE_PORT: "30080"
       BASE_URL: "http://192.168.0.71"
 
@@ -37,18 +37,24 @@ jobs:
       - name: Deploy with Helm
         run: |
           helm upgrade --install ${APP_NAME} ./helm/student-risk-api \
+            --namespace ${NAMESPACE} \
+            --create-namespace \
             --set image.repository=${IMAGE_NAME} \
             --set image.tag=${IMAGE_TAG} \
             --set image.pullPolicy=Never \
             --set service.type=NodePort \
-            --set service.nodePort=${NODE_PORT}
+            --set service.nodePort=${NODE_PORT} \
+            --wait \
+            --timeout 180s
 
       - name: Check deployment
         run: |
-          kubectl get deployments -n student-risk-api
+          kubectl get deployments,svc,pods -n ${NAMESPACE}
+          kubectl rollout status deployment/${APP_NAME}-student-risk-api -n ${NAMESPACE} --timeout=180s
 
       - name: Smoke test /health
         run: |
+          sleep 10
           curl -f ${BASE_URL}:${NODE_PORT}/health
 
       - name: API regression tests
@@ -58,10 +64,4 @@ jobs:
           python -m pip install --upgrade pip
           python -m pip install -r requirements.txt
           export BASE_URL=${BASE_URL}:${NODE_PORT} 
-          python3 -m pytest tests/api -v
-
-      - name: Test selection (--lf)
-        run: |
-          source venv/bin/activate
-          export BASE_URL=${BASE_URL}:${NODE_PORT} 
-          python -m pytest tests/api -v --lf
+          python -m pytest tests/api -v

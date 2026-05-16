@@ -1,90 +1,98 @@
-"""Prediction helper for the saved Decision Tree pipeline artifact."""
+# This import allows modern Python type annotation behavior
+from __future__ import annotations
 
-import os
+# argparse is used to read command-line arguments, such as the dataset path
+import argparse
+
+# joblib is used to load the saved machine learning pipeline from the models folder
 import joblib
-import pandas as pd
 
-MODELS_DIR = os.path.join(os.path.dirname(__file__), "..", "models")
-PIPELINE_FILE = "decision_tree_pipeline.pkl"
-FEATURE_COLUMNS_FILE = "feature_columns.pkl"
+# MODEL_PATH contains the location of the saved trained model pipeline
+from src.config import MODEL_PATH
 
+# load_student_data loads the UCI Student Performance CSV file
+from src.data_loader import load_student_data
 
-def load_model(model_name: str = "decision_tree_pipeline"):
-    """Load a trained pipeline artifact from the models directory."""
-    model_path = os.path.join(MODELS_DIR, PIPELINE_FILE if model_name == "decision_tree_pipeline" else f"{model_name}.pkl")
-    if not os.path.exists(model_path):
+# split_features_and_target separates the input features from the target column
+from src.preprocessing import split_features_and_target
+
+def load_model():
+    """Load the saved pipeline.The saved object contains:
+    - preprocessing
+    - trained Decision Tree
+    """
+    # This checks whether the trained model file exists in the expected location
+    # If the model has not been trained yet, prediction cannot continue
+    if not MODEL_PATH.exists():
+        # A clear error is raised so the user knows that training must be done first
         raise FileNotFoundError(
-            f"Model '{model_name}' not found at {model_path}. Run train.py first."
+            f"Model was not found at {MODEL_PATH}. "
+            "Train the model first with: python -m src.train --data data/student-mat.csv"
         )
-    return joblib.load(model_path)
+    # This loads and returns the saved pipeline.
+    return joblib.load(MODEL_PATH)
 
-
-def load_feature_columns() -> list:
-    """Load the feature column order used during training."""
-    path = os.path.join(MODELS_DIR, FEATURE_COLUMNS_FILE)
-    if not os.path.exists(path):
-        raise FileNotFoundError("feature_columns.pkl not found. Run train.py first.")
-    return joblib.load(path)
-
-
-def predict(features: dict, model_name: str = "decision_tree_pipeline") -> dict:
+def predict_single_student(student_row):
+    """Predict Pass or Fail for one student row.
     """
-    Parameters
-    ----------
-    features : dict
-        Keys are feature names, values are the input values.
-    model_name : str
-        Default: 'decision_tree_pipeline'
+    # This loads the saved trained model pipeline
+    model = load_model()
 
-    Returns
-    -------
-    dict with keys:
-        'label'       : 'Pass' or 'Fail'
-        'probability' : float, probability of Pass
-    """
-    model = load_model(model_name)
-    columns = load_feature_columns()
+    # This predicts the class for the selected student row.
+    prediction = model.predict(student_row)[0]
 
-    df = pd.DataFrame([features], columns=columns).fillna(0)
-    prediction = model.predict(df)[0]
-    probability = model.predict_proba(df)[0][1]  # probability of class 1 (Pass)
+    # This returns the prediction probabilities for both classes
+    # The order is [Fail, Pass] because class 0 is Fail and class 1 is Pass
+    probability = model.predict_proba(student_row)[0]
 
-    return {
-        "label": "Pass" if prediction == 1 else "Fail",
-        "probability": float(probability),
-    }
+    # This converts the numeric prediction into a readable label.
+    label = "Pass" if prediction == 1 else "Fail"
+
+    # This returns both the readable prediction and the probability values
+    return label, probability
 
 
+def demo_prediction(csv_path: str):
+    """Run a prediction on the first row of the dataset."""
+
+    # This loads the dataset from the CSV path provided by the user
+    df = load_student_data(csv_path)
+
+    # This uses the same preprocessing logic as training
+    # It creates the target variable and removes G3 from the input features.
+    X, _ = split_features_and_target(df)
+
+    # This selects the first student row as a simple demonstration example
+    example = X.iloc[[0]]
+
+    # This runs the prediction for the selected example student
+    label, probability = predict_single_student(example)
+
+    # These print statements show the selected input and prediction results in the terminal
+    print("Example input:")
+    print(example.T)
+    print()
+    print(f"Prediction: {label}")
+    print(f"Probability [Fail, Pass]: {probability}")
+
+
+def parse_args():
+    # This creates a command-line argument parser for the prediction script
+    parser = argparse.ArgumentParser(description="Run a demo prediction.")
+
+    # This adds the required --data argument.
+    parser.add_argument(
+        "--data",
+        required=True,
+        help="Path to student-mat.csv or student-por.csv",
+    )
+    # This reads the arguments from the command line and returns them
+    return parser.parse_args()
+
+# This block runs only when the file is executed directly as a script.
 if __name__ == "__main__":
-    # Quick sanity check with a sample student profile
-    sample = {
-        "studytime": 2,
-        "absences": 4,
-        "failures": 0,
-        "G1": 12,
-        "G2": 13,
-        "Medu": 3,
-        "Fedu": 2,
-        "traveltime": 1,
-        "freetime": 3,
-        "goout": 2,
-        "Dalc": 1,
-        "Walc": 2,
-        "health": 4,
-        "internet": 1,
-        "higher": 1,
-        "sex": 1,
-        "address": 1,
-        "famsize": 0,
-        "Pstatus": 1,
-        "schoolsup": 0,
-        "famsup": 1,
-        "paid": 0,
-        "activities": 1,
-        "nursery": 1,
-        "romantic": 0,
-    }
+    # This reads the dataset path from the command-line arguments
+    args = parse_args()
 
-    result = predict(sample)
-    print(f"Prediction : {result['label']}")
-    print(f"Pass probability : {result['probability']:.2%}")
+    # This runs the demo prediction using the provided dataset path
+    demo_prediction(args.data)
